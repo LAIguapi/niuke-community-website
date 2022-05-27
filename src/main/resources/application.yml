@@ -1,0 +1,794 @@
+server:
+  port: 80
+  servlet:
+    context-path: 项目路径
+community:
+  path:
+    domain: 访问项目的路径
+    # domain + context-path + /index
+    upload: 头像上传路径
+
+spring:
+  #queatzProperties
+  quartz:
+    scheduler-name: communitySchedule
+    job-store-type: jdbc
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceId: AUTO
+          jobStore:
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+#            class: org.quartz.simpl.RAMJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            isClustered: true
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 5
+  #TaskExecutionProperties
+  task:
+    execution:
+      pool:
+        #核心线程
+        core-size: 5
+        #最大扩容线程
+        max-size: 10
+        #当处理不完任务时的缓存队列
+        queue-capacity: 100
+#TaskScheduledProperties
+    scheduling:
+      pool:
+        size: 5
+  #kafkaProperties
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: test-consumer-group
+      enable-auto-commit: true
+      auto-commit-interval: 3000
+#  redis配置
+  redis:
+    database: 0
+    host: localhost
+#    port: 6379
+#  邮件业务配置
+  mail:
+    host: smtp邮件地址
+    port: 465
+    username: 你的个人邮箱
+    password: 开通smtp服务后提供的密码
+    protocol: smtps
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+#  前端模板配置
+  thymeleaf:
+    cache: false
+#  热启动(不知道有啥用,极少使用到,个人感觉用处不大)
+  devtools:
+    restart:
+      enabled: true
+#  MYSQL数据库配置
+  datasource:
+    username: 数据库用户名
+    password: 数据库密码
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=UTF-8&timeZone=shanghai
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 30000
+#  ES配置
+  elasticsearch:
+    uris: localhost:9200
+    username: my-application
+#wk配置
+wk:
+  image:
+    #默认配置了环境变量
+    command: wkhtmltoimage
+    storage: html转图后的存放路径
+
+#caffeine
+caffeine:
+  posts:
+    max-size: 15
+    expire-seconds: 240
+#actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: info,caches
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.guapi.entity
+  configuration:
+    use-generated-keys: true
+    map-underscore-to-camel-case: true
+logging:
+  level:
+    com.guapi: debug
+
+
+
+#  file:
+#    name: d:/CodeConllection/PraticeNiuKe/src/main/resources/logs/community.log
+
