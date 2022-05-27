@@ -33,6 +33,7 @@ public class HomeController implements CommunityConstant {
     public String getIndexPage(Model model, Page page,@RequestParam(name = "orderMode",defaultValue = "0") int orderMode) {
         //方法调用前，MVC会自动实例化Model和Page，并且将Page注入Model
         //所以，可以在thymeleaf中直接访问page对象
+
         page.setRows(discussPostService.findDiscussPostRows(0));
         //要把mode也放进路径
         page.setPath("/index?orderMode="+orderMode);

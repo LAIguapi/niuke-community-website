@@ -101,7 +101,7 @@ public class DiscussPostController implements CommunityConstant {
 
         //回复评论的评论
         //评论VO列表
-        List<Map<String, Object>> commentViewObjectList = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> commentViewObjectList = new ArrayList<>();
         if (commentList != null) {
             for (Comment comment : commentList) {
                 //一个评论的VO

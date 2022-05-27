@@ -2,6 +2,7 @@ package com.guapi.dao;
 
 import com.guapi.entity.Comment;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -16,4 +17,7 @@ public interface CommentMapper {
 
     Comment selectCommentById(int id);
 
+    List<Comment> selectCommentsByUser(int userId,int offset,int limit);
+
+    int selectUserCommentRows(@Param("userId") int userId);
 }

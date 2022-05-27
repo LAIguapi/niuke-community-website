@@ -2,6 +2,7 @@ package com.guapi.service;
 
 import com.guapi.dao.CommentMapper;
 import com.guapi.entity.Comment;
+import com.guapi.entity.DiscussPost;
 import com.guapi.util.CommunityConstant;
 import com.guapi.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.HtmlUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -56,4 +58,27 @@ public class CommentService implements CommunityConstant {
     public Comment findCommentById(int id) {
         return commentMapper.selectCommentById(id);
     }
+
+    public List<Comment> findCommentByUser(int userId, int offset, int limit) {
+        //此处要进行判断，判断评论回复的帖子是否存在
+        //但是此处删除完成后，在前端会发现数据不是指定数据。。。暂时想不到什么好的处理方法
+        List<Comment> list = commentMapper.selectCommentsByUser(userId, offset, limit);
+        if (list == null) {
+            throw new IllegalArgumentException("回复列表为空");
+        }
+        List<Comment> comments = new ArrayList<>();
+        for (Comment comment : list) {
+            DiscussPost post = discussPostService.findDiscussPostById(comment.getEntityId());
+            //如果能查找到数据或者帖子不是被删除的状态
+            if (post != null && post.getStatus() != 2) {
+                comments.add(comment);
+            }
+        }
+        return comments;
+    }
+
+    public int findUserCommentRows(int userId) {
+        return commentMapper.selectUserCommentRows(userId);
+    }
+
 }

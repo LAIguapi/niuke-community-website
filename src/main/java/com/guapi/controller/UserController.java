@@ -1,10 +1,11 @@
 package com.guapi.controller;
 
 import com.guapi.annotation.LoginRequired;
+import com.guapi.entity.Comment;
+import com.guapi.entity.DiscussPost;
+import com.guapi.entity.Page;
 import com.guapi.entity.User;
-import com.guapi.service.FollowService;
-import com.guapi.service.LikeService;
-import com.guapi.service.UserService;
+import com.guapi.service.*;
 import com.guapi.util.CommunityConstant;
 import com.guapi.util.CommunityUtil;
 import com.guapi.util.HostHolder;
@@ -25,6 +26,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
@@ -45,7 +50,13 @@ public class UserController implements CommunityConstant {
     private UserService userService;
 
     @Autowired
+    private DiscussPostService discussPostService;
+
+    @Autowired
     private FollowService followService;
+
+    @Autowired
+    private CommentService commentService;
 
     @Autowired
     private HostHolder hostHolder;
@@ -132,25 +143,112 @@ public class UserController implements CommunityConstant {
         model.addAttribute("user", user);
         //点赞数量
         int likeCount = likeService.findUserLikeCount(userId);
-        model.addAttribute("likeCount",likeCount);
+        model.addAttribute("likeCount", likeCount);
         //关注数量
         long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER);
-        model.addAttribute("followeeCount",followeeCount);
+        model.addAttribute("followeeCount", followeeCount);
         //粉丝数量
 
         long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER, userId);
-        model.addAttribute("followerCount",followerCount);
+        model.addAttribute("followerCount", followerCount);
         //是否已关注
 
-        boolean hasFollowed=false;
+        boolean hasFollowed = false;
 //        System.out.println("hostHolder.getUser().id================>"+hostHolder.getUser().getId());
         if (hostHolder.getUser() != null) {
-            hasFollowed=followService.hasFollowed(hostHolder.getUser().getId(),ENTITY_TYPE_USER,userId);
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
         }
 //        System.out.println("hasFollowed===============>"+hasFollowed);
-        model.addAttribute("hasFollowed",hasFollowed);
+        model.addAttribute("hasFollowed", hasFollowed);
         return "/site/profile";
     }
 
+
+    //登录用户发的帖子
+    @RequestMapping(path = "/myPost/{userId}", method = RequestMethod.GET)
+    public String getMyPostPage(@PathVariable("userId") int userId, Page page, Model model) {
+        int orderMode = 0;
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在");
+        }
+        model.addAttribute("user", user);
+        //寻找用户发出的帖子
+
+        page.setLimit(5);
+        page.setRows(discussPostService.findDiscussPostRows(userId));
+        //上面可以查询帖子数量，但是不知道是否改用这个？
+
+        page.setPath("/user/myPost/" + userId);
+        List<DiscussPost> list = discussPostService.findDiscussPosts(userId, page.getOffset(), page.getLimit(), orderMode);
+
+        List<Map<String, Object>> discussPosts = new ArrayList<>();
+        if (list != null) {
+            for (DiscussPost post : list) {
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("post", post);
+                //查询点赞数量
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
+                map.put("likeCount", likeCount);
+                discussPosts.add(map);
+            }
+        }
+
+        model.addAttribute("posts", discussPosts);
+        //model.addAttribute("orderMode",orderMode);
+        return "/site/my-post";
+    }
+
+    //登录用户的回复
+    @RequestMapping(path = "/myReply/{userId}", method = RequestMethod.GET)
+    public String getMyReplyPage(@PathVariable("userId") int userId, Page page, Model model) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在");
+        }
+        model.addAttribute("user", user);
+        page.setLimit(5);
+
+        page.setRows(commentService.findUserCommentRows(userId));//全设置了
+        page.setPath("/user/myReply/" + userId);
+
+
+        //获取回复总数
+        List<Comment> list = commentService.findCommentByUser(userId, page.getOffset(), page.getLimit());
+        //while (list.size()!=page.getLimit()){
+        //    list=commentService.findCommentByUser(userId,page.getOffset(),page.getLimit()+1);
+        //}
+
+        List<Map<String, Object>> commentList = new ArrayList<>();
+
+        for (Comment comment : list) {
+            //取出每一个comment
+            HashMap<String, Object> map = new HashMap<>();
+            //回复主贴评论
+            if (comment.getEntityType() == ENTITY_TYPE_POST) {
+                DiscussPost target = discussPostService.findDiscussPostById(comment.getEntityId());
+                //如果在此处，帖子被删除，那么评论就找不到帖子，target就是null
+                map.put("target", target);
+                map.put("comment", comment);
+                commentList.add(map);
+            }else if(comment.getEntityType()==ENTITY_TYPE_COMMENT){
+                Comment commentById = commentService.findCommentById(comment.getEntityId());
+                //如果是回复评论的话，是没有标题的，要通过回复的评论找到主题帖
+                DiscussPost target = discussPostService.findDiscussPostById(commentById.getEntityId());
+                map.put("target",target);
+                map.put("comment",comment);
+                commentList.add(map);
+            }
+
+        }
+
+
+
+
+        model.addAttribute("commentList", commentList);
+
+        return "/site/my-reply";
+
+    }
 
 }

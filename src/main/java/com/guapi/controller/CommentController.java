@@ -43,6 +43,7 @@ public class CommentController implements CommunityConstant {
         comment.setStatus(0);
         comment.setCreateTime(new Date());
         commentService.addComment(comment);
+
         //触发评论事件
         Event event = new Event()
                 .setTopic(TOPIC_COMMENT)
@@ -51,11 +52,16 @@ public class CommentController implements CommunityConstant {
                 .setEntityId(comment.getEntityId())
                 .setData("postId",discussPostId);
         //评论目标可能是帖子，也可能是评论
+
+        System.out.println(comment.getEntityId());
+
         if (comment.getEntityType()==ENTITY_TYPE_POST){
             DiscussPost target = discussPostService.findDiscussPostById(comment.getEntityId());
             event.setEntityUserId(target.getUserId());
         }else if (comment.getEntityType()==ENTITY_TYPE_COMMENT){
             Comment target = commentService.findCommentById(comment.getEntityId());
+
+            System.out.println(comment.getContent());
             event.setEntityUserId(target.getUserId());
         }
         eventProducer.fireEvent(event);
@@ -67,6 +73,7 @@ public class CommentController implements CommunityConstant {
                     .setEntityType(ENTITY_TYPE_POST)
                     .setEntityId(discussPostId);
             eventProducer.fireEvent(event);
+
             //计算帖子分数
             String redisKey = RedisUtil.getPostScoreKey();
             redisTemplate.opsForSet().add(redisKey,discussPostId);

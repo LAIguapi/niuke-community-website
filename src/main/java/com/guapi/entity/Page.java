@@ -42,7 +42,6 @@ public class Page {
 
     public void setRows(int rows) {
         if (rows >= 0) {
-
             this.rows = rows;
         }
     }

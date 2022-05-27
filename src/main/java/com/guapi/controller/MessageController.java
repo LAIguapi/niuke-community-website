@@ -243,7 +243,7 @@ public class MessageController implements CommunityConstant {
 
         page.setLimit(5);
         page.setPath("/notice/detail/" + topic);
-        logger.error(page.getPath());
+        //logger.error(page.getPath());
         page.setRows(messageService.findNoticeCount(userId, topic));
 
         List<Message> noticeList = messageService.findNotices(userId, topic, page.getOffset(), page.getLimit());
