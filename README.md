@@ -5,7 +5,7 @@
 
 #### 软件架构
 软件架构说明
-* Springboot+Mybatis+Thymeleaf+Kafka+Elasticsearch+Springboot Security
+**Springboot+Mybatis+Thymeleaf+Kafka+Elasticsearch+Springboot Security**
 
 
 #### 安装教程
